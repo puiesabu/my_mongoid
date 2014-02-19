@@ -1,11 +1,22 @@
-require "my_mongoid/attributes/processing"
-
 module MyMongoid
 
   module Attributes
-    include Processing
 
     attr_reader :attributes
+
+    # Set a batch of attributes
+    #
+    # @example Set attributes
+    #   person.set_attributes(:title => "sir", :age => 40)
+    #
+    # @param [ Hash ] attrs The attributes to set.
+    def set_attributes(attrs = nil)
+      attrs ||= {} 
+      attrs.each_pair do |key, value|
+        name = key.to_s
+        send("#{name}=", value)
+      end
+    end
 
     # Read a value from the document attributes. If the value does not exist
     # it will return nil.
@@ -19,8 +30,6 @@ module MyMongoid
     # @param [ String ] name The name of the attribute to get.
     #
     # @return [ Object ] The value of the attribute.
-    #
-    # @since 0.0.1
     def read_attribute(name)
       attributes[name]
     end
@@ -35,10 +44,8 @@ module MyMongoid
     #
     # @param [ String ] name The name of the attribute to update.
     # @param [ Object ] value The value to set for the attribute.
-    #
-    # @since 1.0.0
     def write_attribute(name, value)
       attributes[name] = value
-    end    
+    end
   end
 end

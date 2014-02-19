@@ -1,5 +1,7 @@
 require "my_mongoid/document/class_methods"
 require "my_mongoid/attributes"
+require "my_mongoid/field"
+require "my_mongoid/duplicate_field_error"
 
 module MyMongoid
 
@@ -12,16 +14,12 @@ module MyMongoid
       base.extend(ClassMethods)
     end
 
-    #
     # Check if it is a MyMongoid model
-    #
     def is_mongoid_model?
       self.class.is_mongoid_model?
     end
 
-    #
     # Check if it is a newly initialized record
-    #
     def new_record?
       @new_record
     end
@@ -34,8 +32,6 @@ module MyMongoid
     # @param [ Hash ] attrs The attributes to set up the document with.
     #
     # @return [ Document ] A new document.
-    #
-    # @since 0.0.1
     def initialize(attrs = nil)
       attrs ||= {}
       unless attrs.is_a?(Hash)
@@ -44,6 +40,7 @@ module MyMongoid
 
       @new_record = true
       @attributes = attrs
+      set_attributes(attrs)
     end
   end
 end
