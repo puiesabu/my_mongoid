@@ -12,6 +12,9 @@ module MyMongoid
     def self.included(base)
       MyMongoid.register_model(base)
       base.extend(ClassMethods)
+      base.class_eval do
+        field :_id
+      end
     end
 
     # Check if it is a MyMongoid model
