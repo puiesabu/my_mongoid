@@ -1,11 +1,15 @@
 module MyMongoid
 
-	module Document
+  module Document
 
-		module ClassMethods
-			def is_mongoid_model?
-				true
-			end
-		end
-	end
+    module ClassMethods
+
+    	#
+    	# Check if it is a MyMongoid model
+    	#
+      def is_mongoid_model?
+        true
+      end
+    end
+  end
 end

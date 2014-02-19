@@ -27,6 +27,6 @@ module MyMongoid
   # @since 0.0.1
   def self.register_model(klass)
     @models ||= []
-  	@models.push(klass) unless @models.include?(klass)
+    @models.push(klass) unless @models.include?(klass)
   end
 end

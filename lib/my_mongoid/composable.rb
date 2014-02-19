@@ -4,6 +4,6 @@ module MyMongoid
   #
   # @since 0.0.1
  module Composable
- 	# TODO
+  # TODO
  end
 end
