@@ -14,10 +14,9 @@ module MyMongoid
       attrs ||= {} 
       attrs.each_pair do |key, value|
         name = key.to_s
-        raise UnknownAttributeError, "Field :#{name} is not defined" unless self.class.fields.has_key?(name)
+        raise UnknownAttributeError, "Field :#{name} is not defined" unless self.class.has_field?(name)
 
-        #send("#{name}=", value)
-        self.send "#{key}=", value
+        send("#{name}=", value)
       end
     end
     alias :attributes= :process_attributes
