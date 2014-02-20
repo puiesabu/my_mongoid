@@ -7,16 +7,20 @@ module MyMongoid
     # Set a batch of attributes
     #
     # @example Set attributes
-    #   person.set_attributes(:title => "sir", :age => 40)
+    #   person.process_attributes(:title => "sir", :age => 40)
     #
     # @param [ Hash ] attrs The attributes to set.
-    def set_attributes(attrs = nil)
+    def process_attributes(attrs = nil)
       attrs ||= {} 
       attrs.each_pair do |key, value|
         name = key.to_s
-        send("#{name}=", value)
+        raise UnknownAttributeError, "Field :#{name} is not defined" unless self.class.fields.has_key?(name)
+
+        #send("#{name}=", value)
+        self.send "#{key}=", value
       end
     end
+    alias :attributes= :process_attributes
 
     # Read a value from the document attributes. If the value does not exist
     # it will return nil.
@@ -31,7 +35,8 @@ module MyMongoid
     #
     # @return [ Object ] The value of the attribute.
     def read_attribute(name)
-      attributes[name]
+      field_name = self.class.original_name(name)
+      attributes[field_name]
     end
 
     # Write a single attribute to the document attribute hash. 
@@ -45,7 +50,8 @@ module MyMongoid
     # @param [ String ] name The name of the attribute to update.
     # @param [ Object ] value The value to set for the attribute.
     def write_attribute(name, value)
-      attributes[name] = value
+      field_name = self.class.original_name(name)
+      attributes[field_name] = value
     end
   end
 end
