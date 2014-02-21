@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
-# Debugger
-gem 'pry'
+gem "activesupport", "~> 4.0.3"
 
 # Testing in development and test environments
 group :test do
