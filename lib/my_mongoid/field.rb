@@ -13,19 +13,16 @@ module MyMongoid
   	extend ActiveSupport::Concern
 
     included do
-      @@fields ||= {}
-      @@aliased_fields ||= {}
-
       field :_id, :as => :id
     end
 
     module ClassMethods
     	def fields
-    		@@fields
+    		@fields
     	end
 
     	def aliased_fields
-    		@@aliased_fields
+    		@aliased_fields
     	end 
 
       # @return [ String ] The original field names if alias is provided
@@ -45,8 +42,8 @@ module MyMongoid
       #
       # @param [ Symbol ] name The name of the field.
       def field(name, options = {})
-        fields ||= {}
-        aliased_fields ||= {}
+        @fields ||= {}
+        @aliased_fields ||= {}
 
         field_name = name.to_s
         raise DuplicateFieldError, "Field :#{field_name} is duplicated" if has_field?(field_name)

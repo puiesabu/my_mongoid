@@ -1,7 +1,8 @@
 require "active_support/concern"
 require "my_mongoid/attributes"
-require "my_mongoid/field"
 require "my_mongoid/error"
+require "my_mongoid/field"
+require "my_mongoid/crud"
 
 module MyMongoid
 
@@ -9,6 +10,7 @@ module MyMongoid
     extend ActiveSupport::Concern
     include Attributes
     include Fields
+    include CRUD
 
     included do
       MyMongoid.register_model(self)
