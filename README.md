@@ -1,8 +1,8 @@
-![[Build Status]](https://travis-ci.org/puiesabu/my_mongoid)
-
 # MyMongoid
 
-TODO: Write a gem description
+[![Build Status](https://secure.travis-ci.org/puiesabu/my_mongoid.png?branch=master)](http://travis-ci.org/puiesabu/my_mongoid)
+
+Ruby bootcamp exercise
 
 ## Installation
 
