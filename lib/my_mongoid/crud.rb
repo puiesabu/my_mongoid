@@ -7,20 +7,17 @@ module MyMongoid
       self.class.collection
     end
 
-    def selector
-      @selector ||= {}
-      self.class.fields.keys.each do |field|
-        @selector[field.to_s] = send(field)
-      end
-      @selector
-    end
-
     def save
-      collection.find({"_id" => _id}).update(attributes)
+      if self.new_record?
+        insert_as_root
+      else
+        collection.find({"_id" => _id}).update(attributes)
+      end
       true
     end
 
     def insert_as_root
+      self.new_record = false
       collection.insert(attributes)
     end
 
@@ -46,7 +43,13 @@ module MyMongoid
 
       def find(target_id)
         document = collection.find({"_id" => target_id}).to_a.first
-        document ? doc = new(document) : nil
+        if document 
+          doc = new(document)
+          doc.new_record = false
+          doc
+        else
+          nil
+        end
       end
     end
   end

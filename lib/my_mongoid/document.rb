@@ -12,6 +12,8 @@ module MyMongoid
     include Fields
     include CRUD
 
+    attr_accessor :new_record
+
     included do
       MyMongoid.register_model(self)
     end
