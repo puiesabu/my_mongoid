@@ -142,4 +142,11 @@ describe "Should be able to create a record:" do
       expect(event.new_record?).to eq(false)
     end
   end
+
+  describe "saving a record with no id" do
+    it "should generate a random id" do
+      event = Event.create(attrs)
+      expect(event.id).to be_a(BSON::ObjectId)
+    end
+  end
 end
