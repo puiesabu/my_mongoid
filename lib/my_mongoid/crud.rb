@@ -40,6 +40,15 @@ module MyMongoid
       end
     end
 
+    def delete
+      self.class.collection.find({"_id" => self.id}).remove
+      @deleted = true
+    end
+
+    def deleted?
+      @deleted ||= false
+    end
+
     module ClassMethods
       def collection_name
         self.name.tableize

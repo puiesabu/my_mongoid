@@ -36,17 +36,6 @@ module MyMongoid
     block_given? ? yield(self.configuration) : self.configuration
   end
 
-  # Get the default database session
-  #
-  # @example
-  #   MyMongoid.default_session
-  #
-  # @return [ Moped::Session ] The default session
-  def self.default_session
-    @session ||= create_session()
-    @session
-  end
-
   def self.session
     raise UnconfiguredDatabaseError unless configuration.host
     raise UnconfiguredDatabaseError unless configuration.database
