@@ -1,5 +1,6 @@
 require "moped"
 
+require "my_mongoid/configuration"
 require "my_mongoid/version"
 require "my_mongoid/document"
 
@@ -25,6 +26,14 @@ module MyMongoid
   def self.register_model(klass)
     @models ||= []
     @models.push(klass) unless @models.include?(klass)
+  end
+
+  def self.configuration
+    MyMongoid::Configuration.instance
+  end
+
+  def self.configure
+    block_given? ? yield(self.configuration) : self.configuration
   end
 
   # Get the default database session
