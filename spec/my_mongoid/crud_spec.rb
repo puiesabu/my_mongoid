@@ -150,3 +150,48 @@ describe "Should be able to create a record:" do
     end
   end
 end
+
+describe "Should be able to find a record:" do
+  let(:attrs) {
+    {"_id" => "123", "public" => true}
+  }
+
+  describe "Model.instantiate" do
+    let(:event) {
+      Event.instantiate(attrs)
+    }
+
+    it "should return a model instance" do
+      expect(event).to be_a(Event)
+    end
+
+    it "should return an instance that's not a new_record" do
+      expect(event.new_record?).to eq(false)
+    end
+
+    it "should have the given attributes" do
+      expect(event.id).to eq("123")
+      expect(event.public).to eq(true)
+    end
+  end
+
+  describe "Model.find" do
+    before do
+      event = Event.create(attrs)
+    end
+
+    it "should be able to find a record by issuing query" do
+      expect(Event.find({"_id" => "123", "public" => true})).to be_a(Event)
+    end
+
+    it "should be able to find a record by issuing shorthand id query" do
+      expect(Event.find("123")).to be_a(Event)
+    end
+
+    it "should raise Mongoid::RecordNotFoundError if nothing is found for an id" do
+      expect {
+        Event.find("456")
+      }.to raise_error(MyMongoid::RecordNotFoundError)
+    end
+  end
+end

@@ -85,4 +85,7 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 =end
+  config.before(:each) do
+    MyMongoid.purge!
+  end
 end

@@ -50,6 +50,13 @@ module MyMongoid
     end
 
     module ClassMethods
+      def instantiate attrs = nil
+        attributes = attrs || {}
+        doc = allocate
+        doc.instance_variable_set(:@attributes, attributes)
+        doc.new_record = false
+        doc
+      end
 
       # Check if it is a MyMongoid model
       def is_mongoid_model?

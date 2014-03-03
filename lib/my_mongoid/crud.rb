@@ -30,7 +30,7 @@ module MyMongoid
         MyMongoid.session[collection_name]
       end
 
-      def create attrs = {}
+      def create(attrs = {})
         doc = new(attrs)
         doc.save
         doc
@@ -40,15 +40,28 @@ module MyMongoid
         self.collection.find.to_a.count
       end
 
-      def find(target_id)
-        document = collection.find({"_id" => target_id}).to_a.first
-        if document 
-          doc = new(document)
-          doc.new_record = false
-          doc
-        else
-          nil
+      def find(attrs)
+        case attrs 
+        when Hash
+          selector = create_selector(attrs)
+        when String
+          selector = create_selector({"_id" => attrs})
+        when Fixnum
+          selector = create_selector({"_id" => attrs})
         end
+
+        result = collection.find(selector).to_a
+        raise RecordNotFoundError if result.empty?
+        instantiate(result.first)
+      end
+
+      def create_selector(attrs)
+        selector ||= {}
+        attrs.each_pair do |key, value|
+          field = aliased_fields[key.to_s] || key.to_s
+          selector[field] = value
+        end
+        selector
       end
     end
   end
