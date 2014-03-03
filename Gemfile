@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gem "activesupport", "~> 4.0.3"
-gem "moped", "~> 1.1.1"
 
 # Debugger
 gem "pry"

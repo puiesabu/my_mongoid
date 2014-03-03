@@ -1,3 +1,5 @@
+require "active_support/inflector"
+
 module MyMongoid
 
   module CRUD
@@ -8,48 +10,82 @@ module MyMongoid
     end
 
     def save
-      if self.new_record?
-        insert_as_root
-      else
-        collection.find({"_id" => _id}).update(attributes)
-      end
+      self.id = BSON::ObjectId.new unless self.id
+      collection.insert(self.to_document)
+      self.new_record = false
+      self.changed_attributes.clear
       true
     end
 
-    def insert_as_root
-      self.new_record = false
-      collection.insert(attributes)
+    def atomic_updates
+      result ||= {}
+      if !new_record? && changed?
+        updates ||= {}
+        changed_attributes.keys.each do |key|
+          updates[key] = read_attribute(key)
+        end
+        result["$set"] = updates
+      end
+      result
+    end
+
+    def update_document
+      # get the field changes
+      updates = atomic_updates
+
+      # make the update query
+      unless updates.empty?
+        selector = { "_id" => self.id }
+        self.class.collection.find(selector).update(updates)
+      end
     end
 
     def delete
-      collection.find({"_id" => _id}).remove
-      true
+      self.class.collection.find({"_id" => self.id}).remove
+      @deleted = true
+    end
+
+    def deleted?
+      @deleted ||= false
     end
 
     module ClassMethods
-      def collection
-        MyMongoid.default_session[self.inspect]
+      def collection_name
+        self.name.tableize
       end
 
-      def create(attr = nil, &block)
-        doc = new(attr, &block)
-        doc.insert_as_root
+      def collection
+        MyMongoid.session[collection_name]
+      end
+
+      def create(attrs = {})
+        doc = new(attrs)
+        doc.save
         doc
       end
 
-      def count
-        self.collection.find.to_a.count
+      def find(attrs)
+        case attrs 
+        when Hash
+          selector = create_selector(attrs)
+        when String
+          selector = create_selector({"_id" => attrs})
+        when Fixnum
+          selector = create_selector({"_id" => attrs})
+        end
+
+        result = collection.find(selector).to_a
+        raise RecordNotFoundError if result.empty?
+        instantiate(result.first)
       end
 
-      def find(target_id)
-        document = collection.find({"_id" => target_id}).to_a.first
-        if document 
-          doc = new(document)
-          doc.new_record = false
-          doc
-        else
-          nil
+      def create_selector(attrs)
+        selector ||= {}
+        attrs.each_pair do |key, value|
+          field = aliased_fields[key.to_s] || key.to_s
+          selector[field] = value
         end
+        selector
       end
     end
   end

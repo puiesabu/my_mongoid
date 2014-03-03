@@ -1,112 +1,343 @@
-require "spec_helper"
+require_relative "../spec_helper"
+require_relative "../app/models/event"
 
-class Crud
-  include MyMongoid::Document
-  field :number, :as => :n
+describe "Should be able to configure MyMongoid:" do
+  describe "MyMongoid::Configuration" do
+    let(:config) {
+      MyMongoid::Configuration.instance
+    }
+
+    it "should be a singleton class" do
+      config2 = MyMongoid::Configuration.instance
+      expect(config).to eq(config2)
+      expect{
+        MyMongoid::Configuration.new
+      }.to raise_error(NoMethodError)
+    end
+
+    it "should have #host accessor" do
+      expect{
+        config.host
+      }.not_to raise_error
+    end
+
+    it "should have #database accessor" do
+      expect{
+        config.database
+      }.not_to raise_error
+    end
+  end
+
+  describe "MyMongoid.configuration" do
+    it "should return the MyMongoid::Configuration singleton" do
+      config = MyMongoid.configuration
+      expect(config).to be_a(MyMongoid::Configuration) 
+    end
+  end
+
+  describe "MyMongoid.configure" do
+    it "should yield MyMongoid.configuration to a block" do
+      expect{ 
+        |b| MyMongoid.configure(&b)
+      }.to yield_with_args(MyMongoid.configuration)
+    end
+  end
 end
 
-# Tranucate table
-Crud.collection.find.remove_all
-
-describe MyMongoid::CRUD do
-  describe "#save" do
-    let(:c1) {
-      Crud.new({:id => 1, :n => 11})
+describe "Should be able to get database session:" do
+  describe "MyMongoid.session" do
+    let(:session) {
+      MyMongoid.session
     }
 
-    it "document value should be the same as attributes" do
-      c1.save
-      f1 = Crud.find(1)
-      expect(f1.id).to eq(c1.id)
-      expect(f1.number).to eq(c1.number)
+    it "should return a Moped::Session" do
+      expect(session).to be_a(Moped::Session)
     end
 
-    context "when saving a new record" do
-      let(:c2) {
-        Crud.new({:id => 2, :n => 12})
-      }
+    it "should memoize the session @session" do
+      session2 = MyMongoid.session
+      expect(session).to eq(session2)
+    end
 
-      it "is new_record before saving" do
-        expect(c2.new_record?).to eq(true)
+    context "when host and database is not set" do
+      before do
+        MyMongoid.configure do |config|
+          config.database = nil
+          config.host = nil
+        end
       end
 
-      it "is not new_record after saving" do
-        c2.save
-        expect(c2.new_record?).to eq(false)
+      after do
+        MyMongoid.configure do |config|
+          config.database = "my_mongoid"
+          config.host = "localhost:27017"
+        end
       end
 
-      let(:c3) {
-        Crud.new({:id => 3, :n => 13})
-      }
+      it "should raise MyMongoid::UnconfiguredDatabaseError if host and database are not configured" do
+        expect{
+          MyMongoid.session
+        }.to raise_error(MyMongoid::UnconfiguredDatabaseError)
+      end
+  end
+  end
+end
 
-      it "collection size increased by 1" do
-        count = Crud.count
-        c3.save
-        expect(Crud.count).to eq(count + 1)
+describe "Should be able to create a record:" do
+  describe "model collection:" do
+    describe "Model.collection_name" do
+      it "should use active support's titleize method" do
+        expect(Event.collection_name).to eq(Event.name.tableize)
       end
     end
 
-    context "when saving and existing record" do
-      it "collection size remain the same" do
-        count = Crud.count
-        c = Crud.find(3)
-        c.save
-        expect(Crud.count).to eq(count)
+    describe "Model.collection" do
+      it "should return a model's collection" do
+        expect(Event.collection).to be_a(Moped::Collection)
+      end
+    end
+  end
+end
+
+describe "Should be able to create a record:" do
+  let(:attrs) {
+    {:public => true}
+  }
+
+  let(:event) {
+    Event.new(attrs)
+  }
+
+  describe "#to_document" do
+    it "should be a bson document" do
+      expect{
+        event.to_document.to_bson
+      }.not_to raise_error
+    end
+  end
+
+  describe "Model#save" do
+    describe "successful insert:" do
+      it "should insert a new record into the db" do
+        count = Event.collection.find.to_a.size
+        event.save
+        expect(Event.collection.find.to_a.size).to eq(count + 1)
+      end
+
+      it "should return true" do
+        expect(event.save).to eq(true)
+      end
+
+      it "should make Model#new_record return false" do
+        event.save
+        expect(event.new_record?).to eq(false)
       end
     end
   end
 
+  describe "Model.create" do
+    it "should return a saved record" do
+      event = Event.create(attrs)
+      expect(event).to be_a(Event)
+      expect(event.new_record?).to eq(false)
+    end
+  end
+
+  describe "saving a record with no id" do
+    it "should generate a random id" do
+      event = Event.create(attrs)
+      expect(event.id).to be_a(BSON::ObjectId)
+    end
+  end
+end
+
+describe "Should be able to find a record:" do
+  let(:attrs) {
+    {"_id" => "123", "public" => true}
+  }
+
+  describe "Model.instantiate" do
+    let(:event) {
+      Event.instantiate(attrs)
+    }
+
+    it "should return a model instance" do
+      expect(event).to be_a(Event)
+    end
+
+    it "should return an instance that's not a new_record" do
+      expect(event.new_record?).to eq(false)
+    end
+
+    it "should have the given attributes" do
+      expect(event.id).to eq("123")
+      expect(event.public).to eq(true)
+    end
+  end
+
+  describe "Model.find" do
+    before do
+      event = Event.create(attrs)
+    end
+
+    it "should be able to find a record by issuing query" do
+      expect(Event.find({"_id" => "123", "public" => true})).to be_a(Event)
+    end
+
+    it "should be able to find a record by issuing shorthand id query" do
+      expect(Event.find("123")).to be_a(Event)
+    end
+
+    it "should raise Mongoid::RecordNotFoundError if nothing is found for an id" do
+      expect {
+        Event.find("456")
+      }.to raise_error(MyMongoid::RecordNotFoundError)
+    end
+  end
+end
+
+describe "Should be able to update a record" do
+  let(:attrs) {
+    {"_id" => "123", "public" => true}
+  }
+
+  let(:event) {
+    Event.new(attrs)
+  }
+
+  let(:event1) {
+    Event.create(attrs)
+  }
+
+  let(:event2) {
+    Event.find("123")
+  }
+
+  describe "#changed_attributes" do
+    before do
+      Event.create(attrs)
+    end
+
+    it "should be an empty hash initially" do
+      expect(event2.changed_attributes).to be_empty
+    end
+
+    it "should track writes to attributes" do
+      event2.public = false
+      expect(event2.changed_attributes.has_key?("public")).to eq(true)
+    end
+
+    it "should keep the original attribute values" do
+      event2.public = false
+      expect(event2.changed_attributes["public"]).to eq(true)
+    end
+
+    it "should not make a field dirty if the assigned value is equaled to the old value" do
+      event2.public = true
+      expect(event2.changed_attributes.has_key?("public")).to eq(false)
+    end
+  end
+
+  describe "updating database:" do
+    describe "#save" do
+      it "should have no changes right after persisting" do
+        event.public = false
+        event.save
+        expect(event).to_not be_changed 
+      end
+
+      it "should save the changes if a document is already persisted" do
+        event.public = false
+        event.save
+        expect(event2.public).to eq(false)
+      end
+    end
+
+    describe "#update_document" do
+      it "should not issue query if nothing changed" do
+        event1.update_document
+        expect(event2.attributes).to eq(attrs)
+        expect_any_instance_of(Moped::Query).to_not receive(:update)
+      end
+
+      it "should update the document in database if there are changes" do
+        event1.public = false
+        event1.update_document
+        expect(event2.public).to eq(false)
+      end
+    end
+
+    describe "#update_attributes" do
+      it "should change and persiste attributes of a record" do
+        event1.update_attributes({"public" => false})
+        expect(event2.public).to eq(false)
+      end
+    end    
+  end
+
+  describe "#atomic_updates" do
+    it "should return {} if nothing changed" do
+      event.save
+      expect(event.atomic_updates).to be_empty
+    end
+
+    it "should return {} if record is not a persisted document" do
+      event.public = false
+      expect(event.atomic_updates).to be_empty
+    end
+
+    it "should generate the $set update operation to update a persisted document" do
+      event.save
+      event.public = false
+      expect(event.atomic_updates).to eq({"$set"=>{"public"=>false}})
+    end
+  end
+end
+
+describe "Should track changes made to a record" do
+  describe "#changed?" do
+    let(:attrs) {
+      {"_id" => "123", "public" => true}
+    }
+
+    let(:event) {
+      Event.find(attrs)
+    }
+
+    before do
+      Event.create(attrs)
+    end
+
+    it "should be false for a newly instantiated record" do
+      expect(event).to_not be_changed
+    end
+
+    it "should be true if a field changed" do
+      event.public = false
+      expect(event).to be_changed
+    end
+  end
+end
+
+describe "Should be able to delete a record:" do
   describe "#delete" do
-    it "collection size decreased by 1" do
-      count = Crud.count
-      c = Crud.find(3)
-      c.delete
-      expect(Crud.count).to eq(count - 1)
+    before do
+      Event.create({"_id" => "123"})
     end
 
-    it "cannot be found after delete" do
-      expect(Crud.find(3)).to eq(nil)
-    end
-  end
-
-  describe "#create" do
-    it "cannot be found before create" do
-      expect(Crud.find(4)).to eq(nil)
-    end
-
-    it "can be found after create" do
-      Crud.create({:id => 4, :n => 14})
-      expect(Crud.find(4)).to_not eq(nil)
-    end
-
-    it "collection size increased by 1"do
-      count = Crud.count
-      Crud.create({:id => 5, :n => 15})
-      expect(Crud.count).to eq(count + 1)
-    end
-  end
-
-  describe "#count" do
-    it "returns the collection size" do
-      expect(Crud.count).to eq(Crud.collection.find.to_a.size)
-    end
-  end
-
-  describe "#find" do
-    let(:id) {
-      5
+    let(:event) {
+      Event.find("123")
     }
 
-    let(:c5) {
-      Crud.find(id)
-    }
-
-    it "returns the saved document in MyMongoid model" do
-      expect(c5.is_mongoid_model?).to eq(true)
+    it "should delete a record from db" do
+      count = Event.collection.find.to_a.size
+      event.delete
+      expect(Event.collection.find.to_a.size).to eq(count - 1)
     end
- 
-    it "id is the same as the input" do
-      expect(c5.id).to eq(id)
+
+    it "should return true for deleted?" do
+      event.delete
+      expect(event).to be_deleted
     end
   end
 end
