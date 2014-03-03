@@ -22,7 +22,21 @@ Or install it yourself as:
 
 TODO: Write usage instructions here
 
-## Contributing
+## Learning
+
+1. Warmup
+2. Explore mongoid
+3. Basic Document
+4. Rspec and CI
+5. Mongoid CRUD
+6. Implement CRUD
+7. Implement CRUD 2
+8. Active Support Callbacks
+9. Implement Mymongoid Callbacks
+
+[Reference: Ruby Boot Camp](https://github.com/hayeah/ruby-bootcamp-mongoid)
+
+# Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
