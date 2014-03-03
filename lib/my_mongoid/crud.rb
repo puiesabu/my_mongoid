@@ -1,3 +1,5 @@
+require "active_support/inflector"
+
 module MyMongoid
 
   module CRUD
@@ -8,17 +10,9 @@ module MyMongoid
     end
 
     def save
-      if self.new_record?
-        insert_as_root
-      else
-        collection.find({"_id" => _id}).update(attributes)
-      end
-      true
-    end
-
-    def insert_as_root
+      collection.insert(self.to_document)
       self.new_record = false
-      collection.insert(attributes)
+      true
     end
 
     def delete
@@ -27,13 +21,17 @@ module MyMongoid
     end
 
     module ClassMethods
-      def collection
-        MyMongoid.default_session[self.inspect]
+      def collection_name
+        self.name.tableize
       end
 
-      def create(attr = nil, &block)
-        doc = new(attr, &block)
-        doc.insert_as_root
+      def collection
+        MyMongoid.session[collection_name]
+      end
+
+      def create attrs = {}
+        doc = new(attrs)
+        doc.save
         doc
       end
 

@@ -58,4 +58,10 @@ module MyMongoid
     session.use configuration.database
     session
   end
+
+  def self.purge!
+    session.collections.each do |collection|
+      collection.drop
+    end and true
+  end
 end

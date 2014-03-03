@@ -1,12 +1,5 @@
 require "spec_helper"
 
-class Event
-  include MyMongoid::Document
-  field :_type, :as => :type
-  field :public
-  field :created_at
-end
-
 describe MyMongoid::Document do
   it "is a module" do
     expect(MyMongoid::Document).to be_a(Module)

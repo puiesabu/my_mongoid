@@ -28,6 +28,10 @@ module MyMongoid
       @new_record
     end
 
+    def to_document
+      attributes
+    end
+
     # Instantiate a new Document
     #
     # @example Create a new document.

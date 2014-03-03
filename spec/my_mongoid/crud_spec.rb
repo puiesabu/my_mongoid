@@ -1,4 +1,5 @@
-require "spec_helper"
+require_relative "../spec_helper"
+require_relative "../app/models/event"
 
 describe "Should be able to configure MyMongoid:" do
   describe "MyMongoid::Configuration" do
@@ -82,113 +83,63 @@ describe "Should be able to get database session:" do
   end
 end
 
-class Crud
-  include MyMongoid::Document
-  field :number, :as => :n
+describe "Should be able to create a record:" do
+  describe "model collection:" do
+    describe "Model.collection_name" do
+      it "should use active support's titleize method" do
+        expect(Event.collection_name).to eq(Event.name.tableize)
+      end
+    end
+
+    describe "Model.collection" do
+      it "should return a model's collection" do
+        expect(Event.collection).to be_a(Moped::Collection)
+      end
+    end
+  end
 end
 
-# Tranucate table
-Crud.collection.find.remove_all
+describe "Should be able to create a record:" do
+  let(:attrs) {
+    {:public => true}
+  }
 
-describe MyMongoid::CRUD do
-  describe "#save" do
-    let(:c1) {
-      Crud.new({:id => 1, :n => 11})
-    }
+  let(:event) {
+    Event.new(attrs)
+  }
 
-    it "document value should be the same as attributes" do
-      c1.save
-      f1 = Crud.find(1)
-      expect(f1.id).to eq(c1.id)
-      expect(f1.number).to eq(c1.number)
+  describe "#to_document" do
+    it "should be a bson document" do
+      expect{
+        event.to_document.to_bson
+      }.not_to raise_error
     end
+  end
 
-    context "when saving a new record" do
-      let(:c2) {
-        Crud.new({:id => 2, :n => 12})
-      }
-
-      it "is new_record before saving" do
-        expect(c2.new_record?).to eq(true)
+  describe "Model#save" do
+    describe "successful insert:" do
+      it "should insert a new record into the db" do
+        count = Event.collection.find.to_a.size
+        event.save
+        expect(Event.collection.find.to_a.size).to eq(count + 1)
       end
 
-      it "is not new_record after saving" do
-        c2.save
-        expect(c2.new_record?).to eq(false)
+      it "should return true" do
+        expect(event.save).to eq(true)
       end
 
-      let(:c3) {
-        Crud.new({:id => 3, :n => 13})
-      }
-
-      it "collection size increased by 1" do
-        count = Crud.count
-        c3.save
-        expect(Crud.count).to eq(count + 1)
-      end
-    end
-
-    context "when saving and existing record" do
-      it "collection size remain the same" do
-        count = Crud.count
-        c = Crud.find(3)
-        c.save
-        expect(Crud.count).to eq(count)
+      it "should make Model#new_record return false" do
+        event.save
+        expect(event.new_record?).to eq(false)
       end
     end
   end
 
-  describe "#delete" do
-    it "collection size decreased by 1" do
-      count = Crud.count
-      c = Crud.find(3)
-      c.delete
-      expect(Crud.count).to eq(count - 1)
-    end
-
-    it "cannot be found after delete" do
-      expect(Crud.find(3)).to eq(nil)
-    end
-  end
-
-  describe "#create" do
-    it "cannot be found before create" do
-      expect(Crud.find(4)).to eq(nil)
-    end
-
-    it "can be found after create" do
-      Crud.create({:id => 4, :n => 14})
-      expect(Crud.find(4)).to_not eq(nil)
-    end
-
-    it "collection size increased by 1"do
-      count = Crud.count
-      Crud.create({:id => 5, :n => 15})
-      expect(Crud.count).to eq(count + 1)
-    end
-  end
-
-  describe "#count" do
-    it "returns the collection size" do
-      expect(Crud.count).to eq(Crud.collection.find.to_a.size)
-    end
-  end
-
-  describe "#find" do
-    let(:id) {
-      5
-    }
-
-    let(:c5) {
-      Crud.find(id)
-    }
-
-    it "returns the saved document in MyMongoid model" do
-      expect(c5.is_mongoid_model?).to eq(true)
-    end
- 
-    it "id is the same as the input" do
-      expect(c5.id).to eq(id)
+  describe "Model.create" do
+    it "should return a saved record" do
+      event = Event.create(attrs)
+      expect(event).to be_a(Event)
+      expect(event.new_record?).to eq(false)
     end
   end
 end
