@@ -17,9 +17,27 @@ module MyMongoid
       true
     end
 
-    def delete
-      collection.find({"_id" => _id}).remove
-      true
+    def atomic_updates
+      result ||= {}
+      if !new_record? && changed?
+        updates ||= {}
+        changed_attributes.keys.each do |key|
+          updates[key] = read_attribute(key)
+        end
+        result["$set"] = updates
+      end
+      result
+    end
+
+    def update_document
+      # get the field changes
+      updates = atomic_updates
+
+      # make the update query
+      unless updates.empty?
+        selector = { "_id" => self.id }
+        self.class.collection.find(selector).update(updates)
+      end
     end
 
     module ClassMethods
@@ -35,10 +53,6 @@ module MyMongoid
         doc = new(attrs)
         doc.save
         doc
-      end
-
-      def count
-        self.collection.find.to_a.count
       end
 
       def find(attrs)

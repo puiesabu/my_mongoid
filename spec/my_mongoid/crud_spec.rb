@@ -252,6 +252,45 @@ describe "Should be able to update a record" do
         expect(event2.public).to eq(false)
       end
     end
+
+    describe "#update_document" do
+      it "should not issue query if nothing changed" do
+        event1.update_document
+        expect(event2.attributes).to eq(attrs)
+        expect_any_instance_of(Moped::Query).to_not receive(:update)
+      end
+
+      it "should update the document in database if there are changes" do
+        event1.public = false
+        event1.update_document
+        expect(event2.public).to eq(false)
+      end
+    end
+
+    describe "#update_attributes" do
+      it "should change and persiste attributes of a record" do
+        event1.update_attributes({"public" => false})
+        expect(event2.public).to eq(false)
+      end
+    end    
+  end
+
+  describe "#atomic_updates" do
+    it "should return {} if nothing changed" do
+      event.save
+      expect(event.atomic_updates).to be_empty
+    end
+
+    it "should return {} if record is not a persisted document" do
+      event.public = false
+      expect(event.atomic_updates).to be_empty
+    end
+
+    it "should generate the $set update operation to update a persisted document" do
+      event.save
+      event.public = false
+      expect(event.atomic_updates).to eq({"$set"=>{"public"=>false}})
+    end
   end
 end
 

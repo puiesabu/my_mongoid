@@ -64,5 +64,12 @@ module MyMongoid
     def changed?
       !changed_attributes.empty?
     end
+
+    def update_attributes attrs = {}
+      attrs.each_pair do |key, value|
+        write_attribute(key, value)
+      end
+      update_document
+    end
   end
 end
