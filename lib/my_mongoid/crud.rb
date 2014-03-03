@@ -13,6 +13,7 @@ module MyMongoid
       self.id = BSON::ObjectId.new unless self.id
       collection.insert(self.to_document)
       self.new_record = false
+      self.changed_attributes.clear
       true
     end
 
