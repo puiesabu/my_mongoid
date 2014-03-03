@@ -43,6 +43,45 @@ describe "Should be able to configure MyMongoid:" do
   end
 end
 
+describe "Should be able to get database session:" do
+  describe "MyMongoid.session" do
+    let(:session) {
+      MyMongoid.session
+    }
+
+    it "should return a Moped::Session" do
+      expect(session).to be_a(Moped::Session)
+    end
+
+    it "should memoize the session @session" do
+      session2 = MyMongoid.session
+      expect(session).to eq(session2)
+    end
+
+    context "when host and database is not set" do
+      before do
+        MyMongoid.configure do |config|
+          config.database = nil
+          config.host = nil
+        end
+      end
+
+      after do
+        MyMongoid.configure do |config|
+          config.database = "my_mongoid"
+          config.host = "localhost:27017"
+        end
+      end
+
+      it "should raise MyMongoid::UnconfiguredDatabaseError if host and database are not configured" do
+        expect{
+          MyMongoid.session
+        }.to raise_error(MyMongoid::UnconfiguredDatabaseError)
+      end
+  end
+  end
+end
+
 class Crud
   include MyMongoid::Document
   field :number, :as => :n

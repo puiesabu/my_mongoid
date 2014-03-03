@@ -47,15 +47,15 @@ module MyMongoid
     @session
   end
 
-  # Create new database session
-  #
-  # @example
-  #   MyMongoid.create_session
-  #
-  # @return [ Moped::Session ] new Moped session
+  def self.session
+    raise UnconfiguredDatabaseError unless configuration.host
+    raise UnconfiguredDatabaseError unless configuration.database
+    @session ||= create_session
+  end
+
   def self.create_session
-    session = Moped::Session.new(["localhost:27017"])
-    session.use("my_mongoid")
+    session ||= ::Moped::Session.new([configuration.host])
+    session.use configuration.database
     session
   end
 end
