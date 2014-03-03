@@ -34,7 +34,7 @@ TODO: Write usage instructions here
 8. Active Support Callbacks
 9. Implement Mymongoid Callbacks
 
-[Reference: Ruby Boot Camp](https://github.com/hayeah/ruby-bootcamp-mongoid)
+Reference: [Ruby Boot Camp](https://github.com/hayeah/ruby-bootcamp-mongoid)
 
 # Contributing
 
