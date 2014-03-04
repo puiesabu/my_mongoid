@@ -10,10 +10,14 @@ module MyMongoid
     end
 
     def save
-      self.id = BSON::ObjectId.new unless self.id
-      collection.insert(self.to_document)
-      self.new_record = false
-      self.changed_attributes.clear
+      if new_record?
+        self.id = BSON::ObjectId.new unless self.id
+        collection.insert(self.to_document)
+        self.new_record = false
+        self.changed_attributes.clear
+      else
+        update_document
+      end
       true
     end
 
