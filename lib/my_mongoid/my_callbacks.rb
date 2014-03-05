@@ -2,6 +2,19 @@ module MyMongoid
 
   module MyCallbacks
     extend ActiveSupport::Concern
+
+    class Callback
+      attr_accessor :kind, :filter
+
+      def initialize(filter, kind)
+        @kind    = kind
+        @filter  = filter
+      end
+
+      def invoke(target)
+        target.send filter
+      end
+    end
     
     class CallbackChain
       def initialize(name)
