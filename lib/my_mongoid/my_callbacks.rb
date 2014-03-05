@@ -42,6 +42,15 @@ module MyMongoid
       end
     end
 
+    def run_callbacks(name, &block)
+      cbs = send("_#{name}_callbacks")
+      if cbs.empty?
+        yield if block_given?
+      else
+        cbs.invoke(self, &block)
+      end
+    end
+    
     module ClassMethods
       def set_callback(name, kind, filter)
         get_callbacks(name).append(Callback.new(filter, kind))
