@@ -15,10 +15,30 @@ module MyMongoid
         target.send filter
       end
     end
-    
+
     class CallbackChain
-      def initialize(name)
+      def initialize(name = nil)
         @name = name
+        @chain ||= []
+      end
+
+      def empty?
+        @chain.empty?
+      end
+
+      def chain
+        @chain
+      end
+
+      def append(callback)
+        @chain << callback
+      end
+
+      def invoke(target, &block)
+        chain.each do |callback|
+          callback.invoke(target)
+        end
+        block.call
       end
     end
 
