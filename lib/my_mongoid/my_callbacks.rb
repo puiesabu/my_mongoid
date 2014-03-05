@@ -7,8 +7,8 @@ module MyMongoid
       attr_accessor :kind, :filter
 
       def initialize(filter, kind)
-        @kind    = kind
-        @filter  = filter
+        @kind = kind
+        @filter = filter
       end
 
       def invoke(target)
@@ -43,6 +43,10 @@ module MyMongoid
     end
 
     module ClassMethods
+      def set_callback(name, kind, filter)
+        get_callbacks(name).append(Callback.new(filter, kind))
+      end
+
       def define_callbacks(*names)
         names.each do |name|
           class_attribute "_#{name}_callbacks"
@@ -52,6 +56,10 @@ module MyMongoid
 
       def set_callbacks(name, callbacks)
         send "_#{name}_callbacks=", callbacks
+      end
+
+      def get_callbacks(name)
+        send "_#{name}_callbacks"
       end
     end
   end
