@@ -3,6 +3,7 @@ require "my_mongoid/attributes"
 require "my_mongoid/error"
 require "my_mongoid/field"
 require "my_mongoid/crud"
+require "my_mongoid/my_callbacks"
 
 module MyMongoid
 
