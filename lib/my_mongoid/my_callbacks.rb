@@ -11,8 +11,8 @@ module MyMongoid
         @filter = filter
       end
 
-      def invoke(target)
-        target.send filter
+      def invoke(target, &block)
+        target.send filter, &block
       end
     end
 
@@ -35,10 +35,40 @@ module MyMongoid
       end
 
       def invoke(target, &block)
-        chain.each do |callback|
-          callback.invoke(target)
-        end
+        _invoke(0, target, block)
+      end
+
+      def _invoke(i, target, block)
+        if i == chain.length
+          block.call
+        else
+          callback = chain[i]
+
+          case callback.kind
+          when :before
+            callback.invoke(target)
+            _invoke(i+1, target, block)
+          when :after
+            _invoke(i+1, target, block)
+            callback.invoke(target)
+          when :around
+            callback.invoke(target) do
+              _invoke(i+1, target, block)
+            end
+          end
+         end
+      end
+
+      def sort_callbacks(callbacks)
+        before_callbacks = CallbackChain.new
+ 
         block.call
+        callbacks.each do |callback|
+          case callback.kind
+          when :before
+            before_callbacks.append(callback)
+          end
+        end
       end
     end
 
