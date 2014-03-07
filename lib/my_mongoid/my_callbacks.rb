@@ -14,6 +14,12 @@ module MyMongoid
       def invoke(target, &block)
         target.send filter, &block
       end
+
+      def compile
+        lambda { |target, &block|
+          target.send filter, &block
+        }
+      end
     end
 
     class CallbackChain
