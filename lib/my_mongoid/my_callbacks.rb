@@ -27,6 +27,7 @@ module MyMongoid
       def initialize(name = nil)
         @name = name
         @chain ||= []
+        @callbacks = nil
       end
 
       def empty?
@@ -38,6 +39,7 @@ module MyMongoid
       end
 
       def append(callback)
+        @callbacks = nil
         @chain << callback
       end
 
@@ -67,13 +69,14 @@ module MyMongoid
       end
 
       def compile
-        k = nil
-        i = chain.length
-        while i >= 0
-          k = _compile(k, i)
-          i -= 1
+        unless @callbacks
+          i = chain.length
+          while i >= 0
+            @callbacks = _compile(@callbacks, i)
+            i -= 1
+          end
         end
-        k
+        @callbacks
       end
 
       def _compile(k, i)
