@@ -1,3 +1,4 @@
+require "pry"
 module MyMongoid
 
   module MyCallbacks
@@ -63,6 +64,32 @@ module MyMongoid
             end
           end
          end
+      end
+
+      def compile
+        k = nil
+        i = chain.length
+        while i >= 0
+          k = _compile(k, i)
+          i -= 1
+        end
+        k
+      end
+
+      def _compile(k, i)
+        if i == chain.length
+          lambda { |_, &block| block.call }
+        else
+          callback = chain[i]
+
+          case callback.kind
+          when :before
+            lambda { |target, &block|
+              callback.invoke(target)
+              k.call(target, &block)
+            }
+          end
+        end
       end
     end
 
