@@ -58,18 +58,6 @@ module MyMongoid
           end
          end
       end
-
-      def sort_callbacks(callbacks)
-        before_callbacks = CallbackChain.new
- 
-        block.call
-        callbacks.each do |callback|
-          case callback.kind
-          when :before
-            before_callbacks.append(callback)
-          end
-        end
-      end
     end
 
     def run_callbacks(name, &block)
