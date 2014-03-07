@@ -112,7 +112,10 @@ module MyMongoid
       if cbs.empty?
         yield if block_given?
       else
-        cbs.invoke(self, &block)
+        lambda = cbs.compile
+        lambda.call(self) do
+          self._save
+        end
       end
     end
     
