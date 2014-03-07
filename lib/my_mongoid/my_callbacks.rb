@@ -97,6 +97,11 @@ module MyMongoid
                 k.call(target, &block)
               end
             }
+          when :after
+            lambda { |target, &block|
+              k.call(target, &block)
+              callback.invoke(target)
+            }
           end
         end
       end
