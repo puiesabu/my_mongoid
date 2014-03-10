@@ -1,6 +1,7 @@
 # MyMongoid
 
-[![Build Status](https://secure.travis-ci.org/puiesabu/my_mongoid.png?branch=master)](http://travis-ci.org/puiesabu/my_mongoid)[![Coverage Status](https://coveralls.io/repos/puiesabu/my_mongoid/badge.png?branch=master)](https://coveralls.io/r/puiesabu/my_mongoid?branch=master)
+[![Build Status](https://secure.travis-ci.org/puiesabu/my_mongoid.png?branch=master)](http://travis-ci.org/puiesabu/my_mongoid)
+[![Coverage Status](https://coveralls.io/repos/puiesabu/my_mongoid/badge.png?branch=master)](https://coveralls.io/r/puiesabu/my_mongoid?branch=master)
 
 
 Ruby bootcamp exercise
