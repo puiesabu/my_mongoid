@@ -8,6 +8,10 @@ module MyMongoid
   class UnknownAttributeError < RuntimeError
   end
 
+  # This error is raised when type mismatches 
+  class InvalidFieldTypeError < RuntimeError
+  end
+
   # This error is raised when host and database are not configured
   class UnconfiguredDatabaseError < ArgumentError
   end

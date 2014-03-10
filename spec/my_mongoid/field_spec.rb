@@ -128,6 +128,7 @@ describe "Field options:" do
       include MyMongoid::Document
       field :number, :as => :n
       field :difficulty, :default => "normal"
+      field :time, :type => Time
     end
   }
 
@@ -159,6 +160,18 @@ describe "Field options:" do
   it "default a field with the :default option" do
     record = model.new({})
     expect(record.difficulty).to eq("normal") 
+  end
+
+  it "declare field type with the :type option" do
+    time = Time.now
+    record = model.new({:time => time})
+    expect(record.time).to eq(time)
+  end
+
+  it "raises error when type mismatches" do
+    expect{
+      record = model.new({:time => "hello"})
+    }.to raise_error(MyMongoid::InvalidFieldTypeError)
   end
 end
 

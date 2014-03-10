@@ -39,6 +39,13 @@ module MyMongoid
       end
     end
 
+    def validate_field(name, value)
+      raise UnknownAttributeError, "Field :#{name} is not defined" unless self.class.has_field?(name)
+      if type = fields[name].options[:type]
+        raise InvalidFieldTypeError, "Field :#{name} type mismatches" unless value.class == type
+      end
+    end
+
     module ClassMethods
       # @return [ String ] The original field names if alias is provided
       def original_name(name)

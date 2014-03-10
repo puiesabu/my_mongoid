@@ -14,8 +14,7 @@ module MyMongoid
       attrs ||= {} 
       attrs.each_pair do |key, value|
         name = key.to_s
-        raise UnknownAttributeError, "Field :#{name} is not defined" unless self.class.has_field?(name)
-
+        validate_field(name, value)
         send("#{name}=", value)
       end
     end
