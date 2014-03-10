@@ -1,24 +1,37 @@
 require "active_support/inflector"
+require "active_model"
 
 module MyMongoid
 
   module CRUD
     extend ActiveSupport::Concern
 
+    included do
+      extend ActiveModel::Callbacks
+      include ActiveModel::Validations::Callbacks
+
+      define_model_callbacks :delete, :save, :create, :update
+      define_model_callbacks :find, :initialize, only: :after
+    end
+
     def collection
       self.class.collection
     end
 
     def save
-      if new_record?
-        self.id = BSON::ObjectId.new unless self.id
-        collection.insert(self.to_document)
-        self.new_record = false
-        self.changed_attributes.clear
-      else
-        update_document
+      run_callbacks(:save) do
+        if new_record?
+          run_callbacks(:create) do
+            self.id = BSON::ObjectId.new unless self.id
+            collection.insert(self.to_document)
+            self.new_record = false
+            self.changed_attributes.clear
+          end
+        else
+          update_document
+        end
+        true
       end
-      true
     end
 
     def atomic_updates
@@ -55,11 +68,11 @@ module MyMongoid
 
     module ClassMethods
       def collection_name
-        self.name.tableize
+        self.to_s.tableize
       end
 
       def collection
-        MyMongoid.session[collection_name]
+        MyMongoid.session[collection_name.to_sym]
       end
 
       def create(attrs = {})

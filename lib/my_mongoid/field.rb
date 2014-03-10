@@ -13,18 +13,16 @@ module MyMongoid
   	extend ActiveSupport::Concern
 
     included do
+      class_attribute :fields
+      class_attribute :aliased_fields
+
+      self.fields = {}
+      self.aliased_fields = {}
+
       field :_id, :as => :id
     end
 
     module ClassMethods
-    	def fields
-    		@fields
-    	end
-
-    	def aliased_fields
-    		@aliased_fields
-    	end 
-
       # @return [ String ] The original field names if alias is provided
       def original_name(name)
         aliased_fields[name] || name
