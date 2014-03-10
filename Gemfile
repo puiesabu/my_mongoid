@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gem "activesupport", "~> 4.0.3"
 
+gem 'coveralls', require: false
+
 # Debugger
 gem "pry"
 

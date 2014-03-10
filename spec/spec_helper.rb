@@ -1,5 +1,7 @@
-require "my_mongoid"
+require 'coveralls'
+Coveralls.wear!
 
+require "my_mongoid"
 MyMongoid.configure do |config|
   config.database = "my_mongoid"
   config.host = "localhost:27017"
