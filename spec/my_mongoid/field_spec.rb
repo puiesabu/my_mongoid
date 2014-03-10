@@ -1,4 +1,6 @@
-# spec/my_mongoid/field_spec.rb
+require "spec_helper"
+require_relative "../app/models/event"
+
 describe MyMongoid::Field do
   it "is a module" do
     expect(MyMongoid::Field).to be_a(Module)
@@ -30,6 +32,7 @@ describe MyMongoid::Fields do
     let(:fields) {
       Event.fields
     }
+
     it "maintains a map fields objects" do
       expect(fields).to be_a(Hash)
       expect(fields.keys).to include(*%w(public created_at))
@@ -124,6 +127,7 @@ describe "Field options:" do
     Class.new do
       include MyMongoid::Document
       field :number, :as => :n
+      field :difficulty, :default => "normal"
     end
   }
 
@@ -150,6 +154,11 @@ describe "Field options:" do
     record = model.new({})
     record.id = "abc"
     expect(record._id).to eq("abc")
+  end
+
+  it "default a field with the :default option" do
+    record = model.new({})
+    expect(record.difficulty).to eq("normal") 
   end
 end
 

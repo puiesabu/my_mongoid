@@ -48,6 +48,8 @@ module MyMongoid
       @new_record = true
       @attributes ||= {}
       process_attributes(attrs)
+      apply_defaults
+      self.id = BSON::ObjectId.new unless self.id
     end
 
     module ClassMethods

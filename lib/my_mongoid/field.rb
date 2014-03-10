@@ -15,11 +15,28 @@ module MyMongoid
     included do
       class_attribute :fields
       class_attribute :aliased_fields
+      class_attribute :defaulted_fields
 
-      self.fields = {}
-      self.aliased_fields = {}
+      self.fields ||= {}
+      self.aliased_fields ||= {}
+      self.defaulted_fields ||= []
 
       field :_id, :as => :id
+    end
+
+    def apply_defaults
+      defaulted_fields.each do |name|
+        apply_default(name)
+      end
+    end
+
+    def apply_default(name)
+      unless attributes.has_key?(name)
+        field = fields[name]
+        if default = field.options[:default]
+          write_attribute(name, default)
+        end
+      end
     end
 
     module ClassMethods
@@ -58,7 +75,7 @@ module MyMongoid
 
             aliased_fields[field_alias] = field_name
           when :default
-            write_attribute(name, value)
+            defaulted_fields << field_name
           end
         end
 

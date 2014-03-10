@@ -22,7 +22,6 @@ module MyMongoid
       run_callbacks(:save) do
         if new_record?
           run_callbacks(:create) do
-            self.id = BSON::ObjectId.new unless self.id
             collection.insert(self.to_document)
             self.new_record = false
             self.changed_attributes.clear
