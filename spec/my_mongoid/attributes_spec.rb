@@ -1,9 +1,5 @@
 require "spec_helper"
-
-class Attr
-  include MyMongoid::Document
-  field :age
-end
+require_relative "../app/models/person"
 
 describe "MyMongoid::Attributes" do
   let(:attributes) {
@@ -11,7 +7,7 @@ describe "MyMongoid::Attributes" do
   }
 
   let(:a) {
-    Attr.new(attributes)
+    Person.new(attributes)
   }
 
   it "can read the attributes of model" do
