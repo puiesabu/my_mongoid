@@ -86,19 +86,19 @@ module MyMongoid
           case callback.kind
           when :before
             lambda { |target, &block|
-              callback.invoke(target)
+              callback.compile.call(target)
               k.call(target, &block)
             }
           when :around
             lambda { |target, &block|
-              callback.invoke(target) do
+              callback.compile.call(target) do
                 k.call(target, &block)
               end
             }
           when :after
             lambda { |target, &block|
               k.call(target, &block)
-              callback.invoke(target)
+              callback.compile.call(target)
             }
           end
   
