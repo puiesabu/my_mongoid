@@ -1,5 +1,9 @@
-require 'coveralls'
-Coveralls.wear!
+if ENV["CI"]
+  require "coveralls"
+  Coveralls.wear! do
+    add_filter "spec"
+  end
+end
 
 require "my_mongoid"
 MyMongoid.configure do |config|
