@@ -112,9 +112,7 @@ module MyMongoid
         yield if block_given?
       else
         lambda = cbs.compile
-        lambda.call(self) do
-          self._save
-        end
+        lambda.call(self, &block)
       end
     end
     
