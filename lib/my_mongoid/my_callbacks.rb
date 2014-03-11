@@ -70,21 +70,19 @@ module MyMongoid
 
       def compile
         unless @callbacks
-          i = chain.length
-          while i >= 0
-            @callbacks = _compile(@callbacks, i)
-            i -= 1
-          end
+          k0 = lambda { |_, &block| block.call }
+          @callbacks = _compile(k0, chain.length-1)
         end
+
         @callbacks
       end
 
       def _compile(k, i)
-        if i == chain.length
-          lambda { |_, &block| block.call }
-        else
-          callback = chain[i]
+        return k if i < 0
 
+        callback = chain[i]
+
+        k1 =
           case callback.kind
           when :before
             lambda { |target, &block|
@@ -103,7 +101,8 @@ module MyMongoid
               callback.invoke(target)
             }
           end
-        end
+  
+        _compile(k1, i-1)
       end
     end
 
