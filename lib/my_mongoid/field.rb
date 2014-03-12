@@ -96,6 +96,7 @@ module MyMongoid
         create_getter(name, meth)
         create_setter(name, meth)
         create_dirty_change_check(name, meth)
+        create_dirty_change_accessor(name, meth)
       end
 
       # Create the getter method for the provided field.
@@ -125,6 +126,12 @@ module MyMongoid
       def create_dirty_change_check(name, meth)
         define_method("#{meth}_changed?") do
           attribute_changed?(name)
+        end
+      end
+
+      def create_dirty_change_accessor(name, meth)
+        define_method("#{meth}_change") do
+          [changed_attributes[name], attributes[name]] if attribute_changed?(name)
         end
       end
     end

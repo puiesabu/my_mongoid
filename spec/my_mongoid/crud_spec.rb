@@ -322,6 +322,11 @@ describe "Should track changes made to a record" do
       expect(event).to_not be_id_changed
       expect(event).to be_public_changed
     end
+
+    it "should be able to get the changes for a specific field" do
+      event.public = false
+      expect(event.public_change).to eq([true, false])
+    end
   end
 end
 
