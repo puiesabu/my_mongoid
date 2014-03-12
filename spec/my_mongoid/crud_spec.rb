@@ -316,6 +316,28 @@ describe "Should track changes made to a record" do
       event.public = false
       expect(event).to be_changed
     end
+    
+    it "should be able to check if a specific field has changed" do
+      event.public = false
+      expect(event).to_not be_id_changed
+      expect(event).to be_public_changed
+    end
+
+    it "should be able to get the changes for a specific field" do
+      event.public = false
+      expect(event.public_change).to eq([true, false])
+    end
+
+    it "should be able to get the previous value for a field" do
+      event.public = false
+      expect(event.public_was).to eq(true)
+    end
+
+    it "should be able to reset to previous value" do
+      event.public = false
+      event.public_reset
+      expect(event.public).to eq(true)
+    end
   end
 end
 

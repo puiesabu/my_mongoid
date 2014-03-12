@@ -46,6 +46,11 @@ module MyMongoid
       end
     end
 
+    def attribute_changed?(name)
+      return false unless changed_attributes.has_key?(name)
+      changed_attributes[name] != attributes[name]
+    end
+
     module ClassMethods
       # @return [ String ] The original field names if alias is provided
       def original_name(name)
@@ -68,17 +73,13 @@ module MyMongoid
         @aliased_fields ||= {}
 
         field_name = name.to_s
-        raise DuplicateFieldError, "Field :#{field_name} is duplicated" if has_field?(field_name)
-        create_getter(field_name, field_name)
-        create_setter(field_name, field_name)
+        add_field(field_name, field_name)
 
         options.each_pair do |key, value|
           case key
           when :as
             field_alias = options[:as].to_s
-            raise DuplicateFieldError, "Field :#{field_alias} is duplicated" if has_field?(field_alias)
-            create_getter(field_name, field_alias)
-            create_setter(field_name, field_alias)
+            add_field(field_name, field_alias)
 
             aliased_fields[field_alias] = field_name
           when :default
@@ -88,6 +89,16 @@ module MyMongoid
 
         field = Field.new(field_name, options)
         fields[field_name] = field
+      end
+
+      def add_field(name, meth)
+        raise DuplicateFieldError, "Field :#{meth} is duplicated" if has_field?(meth)
+        create_getter(name, meth)
+        create_setter(name, meth)
+        create_dirty_change_check(name, meth)
+        create_dirty_change_accessor(name, meth)
+        create_dirty_previous_value_accessor(name, meth)
+        create_dirty_reset(name, meth)
       end
 
       # Create the getter method for the provided field.
@@ -111,6 +122,30 @@ module MyMongoid
       def create_setter(name, meth)
         define_method("#{meth}=") do |value|
           write_attribute(name, value)
+        end
+      end
+
+      def create_dirty_change_check(name, meth)
+        define_method("#{meth}_changed?") do
+          attribute_changed?(name)
+        end
+      end
+
+      def create_dirty_change_accessor(name, meth)
+        define_method("#{meth}_change") do
+          [changed_attributes[name], attributes[name]] if attribute_changed?(name)
+        end
+      end
+
+      def create_dirty_previous_value_accessor(name, meth)
+        define_method("#{meth}_was") do
+          attribute_changed?(name) ? changed_attributes[name] : attributes[name]
+        end
+      end
+
+      def create_dirty_reset(name, meth)
+        define_method("#{meth}_reset") do
+          write_attribute(name, changed_attributes[name]) if attribute_changed?(name)
         end
       end
     end
