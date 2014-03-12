@@ -98,6 +98,7 @@ module MyMongoid
         create_dirty_change_check(name, meth)
         create_dirty_change_accessor(name, meth)
         create_dirty_previous_value_accessor(name, meth)
+        create_dirty_reset(name, meth)
       end
 
       # Create the getter method for the provided field.
@@ -139,6 +140,12 @@ module MyMongoid
       def create_dirty_previous_value_accessor(name, meth)
         define_method("#{meth}_was") do
           attribute_changed?(name) ? changed_attributes[name] : attributes[name]
+        end
+      end
+
+      def create_dirty_reset(name, meth)
+        define_method("#{meth}_reset") do
+          write_attribute(name, changed_attributes[name]) if attribute_changed?(name)
         end
       end
     end

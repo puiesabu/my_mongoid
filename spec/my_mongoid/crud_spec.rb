@@ -332,6 +332,12 @@ describe "Should track changes made to a record" do
       event.public = false
       expect(event.public_was).to eq(true)
     end
+
+    it "should be able to reset to previous value" do
+      event.public = false
+      event.public_reset
+      expect(event.public).to eq(true)
+    end
   end
 end
 
