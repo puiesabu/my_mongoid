@@ -327,6 +327,11 @@ describe "Should track changes made to a record" do
       event.public = false
       expect(event.public_change).to eq([true, false])
     end
+
+    it "should be able to get the previous value for a field" do
+      event.public = false
+      expect(event.public_was).to eq(true)
+    end
   end
 end
 
