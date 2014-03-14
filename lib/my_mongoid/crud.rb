@@ -65,6 +65,12 @@ module MyMongoid
       @deleted ||= false
     end
 
+    def reload
+      result = self.class.collection.find({"_id" => self.id}).to_a
+      raise RecordNotFoundError if result.empty?
+      process_attributes(result.first)
+    end
+
     module ClassMethods
       def collection_name
         self.to_s.tableize

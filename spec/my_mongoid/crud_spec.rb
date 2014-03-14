@@ -338,6 +338,13 @@ describe "Should track changes made to a record" do
       event.public_reset
       expect(event.public).to eq(true)
     end
+
+    it "should be able to fetch attributes from database and reload the object" do
+      event.public = false
+      event.reload
+      expect(event.id).to eq("123")
+      expect(event.public).to eq(true)
+    end
   end
 end
 
