@@ -17,6 +17,7 @@ class TestCallback
   around_update :around_callback
   after_update :after_callback
   after_find :after_callback
+  after_initialize :after_initialize_callback
 
   def before_save_callback
   end
@@ -36,6 +37,9 @@ class TestCallback
   end
 
   def after_callback
+  end
+
+  def after_initialize_callback
   end
 end
 
@@ -184,6 +188,13 @@ describe "Should define lifecycle callbacks" do
     it "should run callback after find" do
       expect_any_instance_of(TestCallback).to receive(:after_callback)
       TestCallback.find({:_id => 2})
+    end
+  end
+
+  describe "run initialize after callbacks" do
+    it "should run callback after find" do
+      expect_any_instance_of(TestCallback).to receive(:after_initialize_callback)
+      TestCallback.new({})
     end
   end
 end

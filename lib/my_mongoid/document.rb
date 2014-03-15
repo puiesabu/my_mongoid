@@ -50,6 +50,7 @@ module MyMongoid
       process_attributes(attrs)
       apply_defaults
       self.id = BSON::ObjectId.new unless self.id
+      run_callbacks(:initialize) unless _initialize_callbacks.empty?
     end
 
     module ClassMethods
