@@ -27,7 +27,9 @@ module MyMongoid
             self.changed_attributes.clear
           end
         else
-          update_document
+          run_callbacks(:update) do
+            update_document
+          end
         end
         true
       end
