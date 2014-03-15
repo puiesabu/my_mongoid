@@ -27,7 +27,9 @@ module MyMongoid
             self.changed_attributes.clear
           end
         else
-          update_document
+          run_callbacks(:update) do
+            update_document
+          end
         end
         true
       end
@@ -57,8 +59,10 @@ module MyMongoid
     end
 
     def delete
-      self.class.collection.find({"_id" => self.id}).remove
-      @deleted = true
+      run_callbacks(:delete) do
+        self.class.collection.find({"_id" => self.id}).remove
+        @deleted = true
+      end
     end
 
     def deleted?

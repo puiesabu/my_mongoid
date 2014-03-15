@@ -50,6 +50,7 @@ module MyMongoid
       process_attributes(attrs)
       apply_defaults
       self.id = BSON::ObjectId.new unless self.id
+      run_callbacks(:initialize) unless _initialize_callbacks.empty?
     end
 
     module ClassMethods
@@ -58,6 +59,7 @@ module MyMongoid
         doc = allocate
         doc.instance_variable_set(:@attributes, attributes)
         doc.new_record = false
+        doc.run_callbacks(:find)
         doc
       end
 

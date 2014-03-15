@@ -2,12 +2,22 @@
 class TestCallback
   include MyMongoid::Document
 
+  field :number
+
   before_save :before_save_callback
   around_save :around_save_callback
   after_save :after_save_callback
-  before_create :before_create_callback
-  around_create :around_create_callback
-  after_create :after_create_callback
+  before_delete :before_callback
+  around_delete :around_callback
+  after_delete :after_callback
+  before_create :before_callback
+  around_create :around_callback
+  after_create :after_callback
+  before_update :before_callback
+  around_update :around_callback
+  after_update :after_callback
+  after_find :after_callback
+  after_initialize :after_initialize_callback
 
   def before_save_callback
   end
@@ -19,14 +29,17 @@ class TestCallback
   def after_save_callback
   end
 
-  def before_create_callback
+  def before_callback
   end
 
-  def around_create_callback
+  def around_callback
     yield self if block_given?
   end
 
-  def after_create_callback
+  def after_callback
+  end
+
+  def after_initialize_callback
   end
 end
 
@@ -116,18 +129,22 @@ describe "Should define lifecycle callbacks" do
     TestCallback.find({:_id => 2})
   }
 
+  before {
+    TestCallback.create({:_id => 2})
+  }
+
   describe "run create callbacks" do
     it "should run callbacks when saving a new record" do
-      expect(test1).to receive(:before_create_callback)
-      expect(test1).to receive(:around_create_callback)
-      expect(test1).to receive(:after_create_callback)
+      expect(test1).to receive(:before_callback)
+      expect(test1).to receive(:around_callback)
+      expect(test1).to receive(:after_callback)
       test1.save
     end
     
     it "should run callbacks when creating a new record" do
-      expect_any_instance_of(TestCallback).to receive(:before_create_callback)
-      expect_any_instance_of(TestCallback).to receive(:around_create_callback)
-      expect_any_instance_of(TestCallback).to receive(:after_create_callback)
+      expect_any_instance_of(TestCallback).to receive(:before_callback)
+      expect_any_instance_of(TestCallback).to receive(:around_callback)
+      expect_any_instance_of(TestCallback).to receive(:after_callback)
       TestCallback.create({:_id => 1})
     end
   end
@@ -141,11 +158,43 @@ describe "Should define lifecycle callbacks" do
     end
 
     it "should run callbacks when saving a persisted record" do
-      TestCallback.create({:_id => 2})
       expect(test2).to receive(:before_save_callback)
       expect(test2).to receive(:around_save_callback)
       expect(test2).to receive(:after_save_callback)
       test2.save
+    end
+  end
+
+  describe "run update callbacks" do
+    it "should run callbacks when updaing a record" do
+      test2.number = 2
+      expect(test2).to receive(:before_callback)
+      expect(test2).to receive(:around_callback)
+      expect(test2).to receive(:after_callback)
+      test2.save
+    end
+  end
+
+  describe "run delete callbacks" do
+    it "should run callbacks when updaing a record" do
+      expect(test2).to receive(:before_callback)
+      expect(test2).to receive(:around_callback)
+      expect(test2).to receive(:after_callback)
+      test2.delete
+    end
+  end
+
+  describe "run find after callbacks" do
+    it "should run callback after find" do
+      expect_any_instance_of(TestCallback).to receive(:after_callback)
+      TestCallback.find({:_id => 2})
+    end
+  end
+
+  describe "run initialize after callbacks" do
+    it "should run callback after find" do
+      expect_any_instance_of(TestCallback).to receive(:after_initialize_callback)
+      TestCallback.new({})
     end
   end
 end
