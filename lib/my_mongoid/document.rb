@@ -58,6 +58,7 @@ module MyMongoid
         doc = allocate
         doc.instance_variable_set(:@attributes, attributes)
         doc.new_record = false
+        doc.run_callbacks(:find)
         doc
       end
 

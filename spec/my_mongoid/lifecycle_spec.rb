@@ -16,6 +16,7 @@ class TestCallback
   before_update :before_callback
   around_update :around_callback
   after_update :after_callback
+  after_find :after_callback
 
   def before_save_callback
   end
@@ -176,6 +177,13 @@ describe "Should define lifecycle callbacks" do
       expect(test2).to receive(:around_callback)
       expect(test2).to receive(:after_callback)
       test2.delete
+    end
+  end
+
+  describe "run find after callbacks" do
+    it "should run callback after find" do
+      expect_any_instance_of(TestCallback).to receive(:after_callback)
+      TestCallback.find({:_id => 2})
     end
   end
 end
