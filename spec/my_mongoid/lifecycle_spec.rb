@@ -7,6 +7,9 @@ class TestCallback
   before_save :before_save_callback
   around_save :around_save_callback
   after_save :after_save_callback
+  before_delete :before_crud_callback
+  around_delete :around_crud_callback
+  after_delete :after_crud_callback
   before_create :before_crud_callback
   around_create :around_crud_callback
   after_create :after_crud_callback
@@ -162,6 +165,16 @@ describe "Should define lifecycle callbacks" do
       expect(test2).to receive(:around_crud_callback)
       expect(test2).to receive(:after_crud_callback)
       test2.save
+    end
+  end
+
+  describe "run delete callbacks" do
+    it "should run callbacks when updaing a record" do
+      TestCallback.create({:_id => 2})
+      expect(test2).to receive(:before_crud_callback)
+      expect(test2).to receive(:around_crud_callback)
+      expect(test2).to receive(:after_crud_callback)
+      test2.delete
     end
   end
 end

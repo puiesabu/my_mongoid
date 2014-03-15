@@ -59,8 +59,10 @@ module MyMongoid
     end
 
     def delete
-      self.class.collection.find({"_id" => self.id}).remove
-      @deleted = true
+      run_callbacks(:delete) do
+        self.class.collection.find({"_id" => self.id}).remove
+        @deleted = true
+      end
     end
 
     def deleted?
